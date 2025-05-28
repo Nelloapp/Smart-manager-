@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Menù</title>
+</head>
+<body>
+  <h2>🍴 Menù Ristorante</h2>
+  <form id="form-menu">
+    <input type="text" placeholder="Nome piatto" required>
+    <input type="text" placeholder="Categoria (es. primi)" required>
+    <input type="number" placeholder="Prezzo" required>
+    <button type="submit">➕ Aggiungi</button>
+  </form>
+  <ul id="menu-list"></ul>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js "></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js "></script>
+  <script src="firebase-config.js"></script>
+
+  <script>
+    const form = document.getElementById('form-menu');
+    const list = document.getElementById('menu-list');
+
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const nome = form[0].value.trim();
+      const categoria = form[1].value.trim();
+      const prezzo = parseFloat(form[2].value.trim());
+
+      if (nome && categoria && !isNaN(prezzo)) {
+        db.collection("menu").add({ nome, categoria, prezzo, disponibile: true });
+        form.reset();
+      }
+    };
+
+    db.collection("menu").onSnapshot(snapshot => {
+      list.innerHTML = '';
+      snapshot.forEach(doc => {
+        const item = doc.data();
+        const li = document.createElement('li');
+        li.textContent = `${item.nome} - ${item.categoria} - €${item.prezzo}`;
+        list.appendChild(li);
+      });
+    });
+  </script>
+</body>
+</html>
