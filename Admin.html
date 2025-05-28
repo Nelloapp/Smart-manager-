@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin</title>
+</head>
+<body>
+  <h2>📊 Statistiche Vendite</h2>
+  <div id="stats">Caricamento...</div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js "></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js "></script>
+  <script src="firebase-config.js"></script>
+
+  <script>
+    db.collection("ordini").where("stato", "==", "completato").onSnapshot(snapshot => {
+      let totale = 0;
+      snapshot.forEach(doc => {
+        totale += doc.data().totale;
+      });
+      document.getElementById('stats').innerHTML = `
+        <p>Totale Incassi Oggi: €${totale.toFixed(2)}</p>
+      `;
+    });
+  </script>
+</body>
+</html>
