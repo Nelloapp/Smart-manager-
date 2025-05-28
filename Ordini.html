@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ordini</title>
+</head>
+<body>
+  <h2>🍽️ Ordine Tavolo <span id="tavolo-num"></span></h2>
+  <div id="menu-container"></div>
+  <button onclick="inviaInCucina()">🖨️ Invia in Cucina</button>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js "></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js "></script>
+  <script src="firebase-config.js"></script>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const tavoloId = params.get('id');
+    const tavoloNum = document.getElementById('tavolo-num');
+    tavoloNum.textContent = `#${tavoloId}`;
+
+    db.collection("menu").onSnapshot(snapshot => {
+      const container = document.getElementById('menu-container');
+      container.innerHTML = '';
+      snapshot.forEach(doc => {
+        const piatto = doc.data();
+        const btn = document.createElement('button');
+        btn.textContent = `${piatto.nome} - €${piatto.prezzo}`;
+        btn.onclick = () => aggiungiPiatto(piatto, tavoloId);
+        container.appendChild(btn);
+      });
+    });
+
+    function aggiungiPiatto(piatto, tavoloId) {
+      db.collection("ordini").add({
+        tavolo: tavoloId,
+        piatti: [piatto],
+        totale: piatto.prezzo,
+        stato: "aperto"
+      });
+    }
+
+    function inviaInCucina() {
+      db.collection("ordini")
+        .where("tavolo", "==", tavoloId)
+        .where("stato", "==", "aperto")
+        .get()
+        .then(snapshot => {
+          snapshot.forEach(doc => {
+            doc.ref.update({ stato: "in preparazione" });
+          });
+        });
+    }
+  </script>
+</body>
+</html>
